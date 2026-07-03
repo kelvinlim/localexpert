@@ -7,3 +7,6 @@ __pycache__/
 
 # Generated audit notebooks (keep the directory, not its contents)
 # notebooks/*.ipynb
+
+# Generated plot artifacts from agent runs
+data/*.png
