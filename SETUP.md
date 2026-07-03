@@ -74,7 +74,9 @@ the first download takes a while; later runs are instant and offline.
 
 The AI chat lives in **GitHub Copilot Chat**, and you add your local Ollama models to it:
 
-1. Open **Copilot Chat** (chat icon in the left sidebar). Sign in to GitHub if prompted
+1. Open **Copilot Chat**: press **⌃⌘I** (Mac) or **Ctrl+Alt+I** (Windows), or click the
+   **chat icon in the top title bar** (the speech-bubble near the search box). It opens as a
+   panel on the **right** — it is *not* in the left sidebar. Sign in to GitHub if prompted
    (free — no paid plan).
 2. Click the **model dropdown** at the top of the chat box, then **Manage Models**
    (the gear / "Manage Language Models").
@@ -100,6 +102,9 @@ You're ready — open [TUTORIAL.md](TUTORIAL.md) and do your first analysis.
 
 ## Troubleshooting
 
+- **No Copilot Chat icon in the left sidebar?** It isn't there — Copilot Chat opens on the
+  **right**. Press **⌃⌘I** (Mac) / **Ctrl+Alt+I** (Windows), or click the chat/speech-bubble
+  icon in the **top title bar**.
 - **No "install recommended extensions" banner?** It doesn't always appear. Just install the
   extensions by name in the Extensions panel (Step 4), or run **"Extensions: Show Recommended
   Extensions"** from the Command Palette (`Cmd/Ctrl+Shift+P`).

@@ -32,7 +32,9 @@ left (or `Shift+Enter`).
 
 ## 3. Open the AI chat in Agent mode
 
-Open **Copilot Chat** (chat icon, left sidebar). At the top of the chat box:
+Open **Copilot Chat** — press **⌃⌘I** (Mac) / **Ctrl+Alt+I** (Windows), or click the
+chat/speech-bubble icon in the **top title bar**. It opens on the **right** (not the left
+sidebar). At the top of the chat box:
 
 - Set the mode to **Agent**.
 - Set the model to your local **`qwen3.5:9b`**. Not listed? Add it via the model dropdown →

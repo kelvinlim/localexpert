@@ -83,7 +83,8 @@ cells; nothing leaves your laptop.
 **How to use it (4 steps):**
 
 1. **Select the kernel** (top-right): pick the `.venv` interpreter for this folder.
-2. **Open Copilot Chat** (the chat icon in the sidebar) and switch it to **Agent** mode.
+2. **Open Copilot Chat** — press `Cmd+Ctrl+I` (Mac) / `Ctrl+Alt+I` (Windows), or click the
+   chat icon in the **top title bar** (it opens on the right) — and switch it to **Agent** mode.
 3. **Pick the local model** in the chat model dropdown (e.g. `qwen3.5:9b`). If you don't
    see it, open *Manage Models* and add your Ollama models.
 4. **Ask a question** in plain language — e.g.
