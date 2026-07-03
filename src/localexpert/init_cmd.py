@@ -20,9 +20,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
+from importlib import metadata
 from pathlib import Path
 
 import nbformat
@@ -174,6 +176,44 @@ def write_starter_notebook(target: Path) -> Path:
     return path
 
 
+def analysis_dependencies() -> list[str]:
+    """The notebook kernel's packages — localexpert's own runtime deps (minus extras).
+
+    Read from installed metadata so it stays in sync with pyproject (incl. the
+    scikit-learn<1.8 pin) and includes ipykernel, so VS Code detects the .venv.
+    """
+    reqs = metadata.requires("localexpert") or []
+    deps: list[str] = []
+    for r in reqs:
+        if "extra ==" in r:  # skip optional groups like dev/pytest
+            continue
+        deps.append(r.split(";")[0].strip())
+    return deps
+
+
+def create_venv(target: Path) -> bool:
+    """Create ``.venv`` in the target and install the analysis stack (via uv)."""
+    venv_dir = target / ".venv"
+    py = venv_dir / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+    if py.exists():
+        print("  · .venv already present — leaving it as is")
+        return True
+    if shutil.which("uv") is None:
+        print("  ! uv not found — skipping .venv. Create it yourself in this folder:\n"
+              "      uv venv\n"
+              "      uv pip install " + " ".join(analysis_dependencies()))
+        return False
+    print("  · creating .venv and installing the analysis packages (a minute or two)…")
+    try:
+        subprocess.run(["uv", "venv", str(venv_dir)], check=True)
+        subprocess.run(["uv", "pip", "install", "--python", str(py),
+                        *analysis_dependencies()], check=True)
+        return True
+    except subprocess.CalledProcessError as exc:
+        print(f"  ! building the .venv failed ({exc}); create it manually later.")
+        return False
+
+
 def pull_model(model: str) -> bool:
     """Best-effort `ollama pull`. Returns True on success, False (with a note) otherwise."""
     if shutil.which("ollama") is None:
@@ -194,7 +234,7 @@ def pull_model(model: str) -> bool:
 # --------------------------------------------------------------------------- #
 
 def build_workspace(target: Path, model: str = PORTABLE_MODEL,
-                    pull: bool = True) -> None:
+                    pull: bool = True, venv: bool = True) -> None:
     """Scaffold the whole workspace under ``target``."""
     target = target.resolve()
     print(f"Scaffolding a localexpert workspace in {target}")
@@ -208,12 +248,14 @@ def build_workspace(target: Path, model: str = PORTABLE_MODEL,
     for p in written:
         print(f"  + {p.relative_to(target)}")
 
+    if venv:
+        create_venv(target)
     if pull:
         pull_model(model)
 
     print(
         "\nDone. Next:\n"
-        f"  1. Open this folder in VS Code and accept the recommended extensions.\n"
+        f"  1. Open this folder in VS Code and install the recommended extensions.\n"
         f"  2. Open notebooks/analysis_starter.ipynb and select the .venv kernel.\n"
         f"  3. In Copilot Chat: Agent mode + the local '{model}' model, then ask a question.\n"
         "  See SETUP.md and TUTORIAL.md for the full guide."
@@ -227,10 +269,13 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
                         help=f"Ollama model to pull / recommend (default: {PORTABLE_MODEL}).")
     parser.add_argument("--no-pull", action="store_true",
                         help="Do not run 'ollama pull' (just write the workspace files).")
+    parser.add_argument("--no-venv", action="store_true",
+                        help="Do not create the .venv / install analysis packages.")
 
 
 def run(args: argparse.Namespace) -> int:
-    build_workspace(Path(args.target), model=args.model, pull=not args.no_pull)
+    build_workspace(Path(args.target), model=args.model,
+                    pull=not args.no_pull, venv=not args.no_venv)
     return 0
 
 

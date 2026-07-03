@@ -47,8 +47,10 @@ uvx --from git+https://github.com/kelvinlim/localexpert localexpert init
 ```
 
 This installs everything and scaffolds the folder: a starter notebook, sample data, the
-VS Code settings, and the AI "skills". It also downloads the local model (`qwen3.5:9b`) —
-the first download takes a while; later runs are instant and offline.
+VS Code settings, and the AI "skills". It also **creates a `.venv`** with the analysis
+packages (so the notebook has a Python to run in) and downloads the local model
+(`qwen3.5:9b`). The first run takes a while (building the environment + the model
+download); later runs are quick and offline.
 
 > Prefer a permanent install? `uv tool install git+https://github.com/kelvinlim/localexpert`
 > then run `localexpert init` in your folder.
@@ -60,15 +62,16 @@ the first download takes a while; later runs are instant and offline.
 3. Install the extensions. VS Code *sometimes* shows an "install recommended extensions"
    banner — if it does, click **Install**. **If no banner appears** (common), install them
    yourself: open the **Extensions** panel (square icon in the left bar, or
-   `Cmd/Ctrl+Shift+X`) and search for and install:
+   `Cmd/Ctrl+Shift+X`) and search for and install each:
    - **GitHub Copilot Chat** (`GitHub.copilot-chat`) — the chat interface. **Required.**
    - **Python** (`ms-python.python`) and **Jupyter** (`ms-toolsai.jupyter`) — for notebooks.
+   - **Ollama** (`ollama.ollama`, publisher *Ollama*) — connects your local models to the
+     chat. **Requires VS Code 1.120+** (check **Code → About**); if you're older, skip it and
+     use the built-in "Ollama (Deprecated)" provider in Step 5 instead. ⚠️ Pick the one
+     published by **Ollama** (blue check), not third-party look-alikes.
 
    > Tip: you can also open the Command Palette (`Cmd/Ctrl+Shift+P`) and run
    > **"Extensions: Show Recommended Extensions"** to see this folder's suggested list.
-   >
-   > *(There is also an optional "Ollama" extension, `ollama.ollama`, that auto-detects
-   > local models — but it needs VS Code 1.120+ and isn't required; Step 5 works without it.)*
 
 ## Step 5 — Connect your local model to Copilot Chat
 
@@ -80,12 +83,12 @@ The AI chat lives in **GitHub Copilot Chat**, and you add your local Ollama mode
    (free — no paid plan).
 2. Click the **model dropdown** at the top of the chat box, then **Manage Models**
    (the gear / "Manage Language Models").
-3. Click **Add Models**, then pick **Ollama** from the provider list. It may be labelled
-   **"Ollama (Deprecated)"** — that's fine, it still works and loads your local models. VS Code
-   reads your running Ollama server; select **`qwen3.5:9b`** and add it. If it's hidden in the
-   picker afterward, click the **eye / Unhide** icon next to it.
-   - *Non-deprecated alternative:* **Install Model Providers → Ollama** (installs the official
-     `ollama.ollama` extension) — only on VS Code **1.120+**. Not required.
+3. Click **Add Models**, then pick **Ollama** from the provider list:
+   - If you installed the **Ollama extension** (Step 4), choose the plain **Ollama** entry.
+   - If not, choose **"Ollama (Deprecated)"** — despite the label it still works fine.
+
+   VS Code reads your running Ollama server; select **`qwen3.5:9b`** and add it. If it's hidden
+   in the picker afterward, click the **eye / Unhide** icon next to it.
    - **Shortcut:** instead of steps 2–3, run **`ollama launch vscode`** in a terminal — it
      configures VS Code and shows recommended models automatically.
 4. Back in the chat box, set the mode to **Agent** and select **`qwen3.5:9b`** as the model.
@@ -122,5 +125,10 @@ You're ready — open [TUTORIAL.md](TUTORIAL.md) and do your first analysis.
   redo **Manage Models → Add Models → Ollama** and click **Unhide** if the model is hidden.
 - **The model isn't offered in Agent mode?** Agent mode only shows models that support
   tool-calling. `qwen3.5:9b` does; if you swapped models, try `qwen2.5-coder`.
+- **No `.venv` / no Python kernel in the folder?** `localexpert init` builds it. If it's
+  missing (e.g. you ran an older version), re-run it — add `--refresh` so uv fetches the
+  latest: `uvx --refresh --from git+https://github.com/kelvinlim/localexpert localexpert init`.
+  Or create it by hand in the folder: `uv venv` then
+  `uv pip install pandas numpy scipy statsmodels "scikit-learn<1.8" matplotlib seaborn lifelines factor_analyzer ipykernel`.
 - **Wrong Python/kernel?** In the notebook, click **Select Kernel** (top-right) and choose
   the `.venv` for this folder.
