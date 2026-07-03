@@ -1,8 +1,9 @@
 # Setup — chat with a local LLM in VS Code (Mac & Windows)
 
 This gets you a **fully local** setup: you chat with an AI in VS Code and it does the
-analysis in a Jupyter notebook on your machine. Nothing is sent to the cloud, so it is
-safe for sensitive data. No GitHub account or paid plan is required.
+analysis in a Jupyter notebook on your machine. The model runs on your laptop, so your
+data stays local. **No paid Copilot plan is required** — but you do need a free GitHub
+sign-in, because VS Code's model picker requires being signed in (even for local models).
 
 You do this **once**. After that, see [TUTORIAL.md](TUTORIAL.md) for a first analysis.
 
@@ -52,19 +53,36 @@ the first download takes a while; later runs are instant and offline.
 > Prefer a permanent install? `uv tool install git+https://github.com/kelvinlim/localexpert`
 > then run `localexpert init` in your folder.
 
-## Step 4 — Install VS Code and open the folder
+## Step 4 — Install VS Code and its extensions
 
 1. Install **VS Code**: <https://code.visualstudio.com>.
 2. **File → Open Folder…** and pick the folder from Step 3.
-3. When VS Code offers to **install recommended extensions**, click **Install** (this adds
-   Python, Jupyter, Copilot Chat, and the Ollama connector).
+3. Install the extensions. VS Code *sometimes* shows an "install recommended extensions"
+   banner — if it does, click **Install**. **If no banner appears** (common), install them
+   yourself: open the **Extensions** panel (square icon in the left bar, or
+   `Cmd/Ctrl+Shift+X`) and search for and install:
+   - **GitHub Copilot Chat** (`GitHub.copilot-chat`) — the chat interface. **Required.**
+   - **Python** (`ms-python.python`) and **Jupyter** (`ms-toolsai.jupyter`) — for notebooks.
 
-## Step 5 — Point VS Code at the local model
+   > Tip: you can also open the Command Palette (`Cmd/Ctrl+Shift+P`) and run
+   > **"Extensions: Show Recommended Extensions"** to see this folder's suggested list.
+   >
+   > *(There is also an optional "Ollama" extension, `ollama.ollama`, that auto-detects
+   > local models — but it needs VS Code 1.120+ and isn't required; Step 5 works without it.)*
 
-1. Open **Copilot Chat** (chat icon in the left sidebar).
-2. Switch the chat mode to **Agent** (dropdown at the top of the chat box).
-3. In the model dropdown, pick your local model (e.g. `qwen3.5:9b`). If it isn't listed,
-   click **Manage Models → Ollama** and add it.
+## Step 5 — Connect your local model to Copilot Chat
+
+The AI chat lives in **GitHub Copilot Chat**, and you add your local Ollama models to it:
+
+1. Open **Copilot Chat** (chat icon in the left sidebar). Sign in to GitHub if prompted
+   (free — no paid plan).
+2. Click the **model dropdown** at the top of the chat box, then **Manage Models**
+   (the gear / "Manage Language Models").
+3. Choose **Add Models → Ollama**. VS Code loads the models from your running Ollama
+   server; if any are hidden, click **Unhide** so `qwen3.5:9b` shows in the picker.
+   - **Shortcut:** instead of steps 2–3, run **`ollama launch vscode`** in a terminal — it
+     configures VS Code and shows recommended models automatically.
+4. Back in the chat box, set the mode to **Agent** and select **`qwen3.5:9b`** as the model.
 
 You're ready — open [TUTORIAL.md](TUTORIAL.md) and do your first analysis.
 
@@ -82,8 +100,16 @@ You're ready — open [TUTORIAL.md](TUTORIAL.md) and do your first analysis.
 
 ## Troubleshooting
 
-- **No local model in the dropdown?** Make sure Ollama is running (Step 1) and the model is
-  pulled: `ollama pull qwen3.5:9b`. Then reopen the model picker.
+- **No "install recommended extensions" banner?** It doesn't always appear. Just install the
+  extensions by name in the Extensions panel (Step 4), or run **"Extensions: Show Recommended
+  Extensions"** from the Command Palette (`Cmd/Ctrl+Shift+P`).
+- **Can't find an "Ollama" extension?** You don't need one. Add your models *through* GitHub
+  Copilot Chat: model dropdown → **Manage Models → Add Models → Ollama** (Step 5), or run
+  `ollama launch vscode`. The separate `ollama.ollama` extension is optional and needs VS Code
+  1.120+.
+- **No local model in the dropdown?** Make sure Ollama is running (Step 1), the model is pulled
+  (`ollama pull qwen3.5:9b`), and you're **signed in to GitHub** (the picker needs it). Then
+  redo **Manage Models → Add Models → Ollama** and click **Unhide** if the model is hidden.
 - **The model isn't offered in Agent mode?** Agent mode only shows models that support
   tool-calling. `qwen3.5:9b` does; if you swapped models, try `qwen2.5-coder`.
 - **Wrong Python/kernel?** In the notebook, click **Select Kernel** (top-right) and choose

@@ -35,7 +35,8 @@ left (or `Shift+Enter`).
 Open **Copilot Chat** (chat icon, left sidebar). At the top of the chat box:
 
 - Set the mode to **Agent**.
-- Set the model to your local **`qwen3.5:9b`**.
+- Set the model to your local **`qwen3.5:9b`**. Not listed? Add it via the model dropdown →
+  **Manage Models → Add Models → Ollama** (see [SETUP.md](SETUP.md) Step 5).
 
 > **Why Agent mode?** Only Agent mode lets the AI *add and run cells for you*. Plain "Ask"
 > mode just talks.
