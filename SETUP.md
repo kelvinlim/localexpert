@@ -80,8 +80,12 @@ The AI chat lives in **GitHub Copilot Chat**, and you add your local Ollama mode
    (free — no paid plan).
 2. Click the **model dropdown** at the top of the chat box, then **Manage Models**
    (the gear / "Manage Language Models").
-3. Choose **Add Models → Ollama**. VS Code loads the models from your running Ollama
-   server; if any are hidden, click **Unhide** so `qwen3.5:9b` shows in the picker.
+3. Click **Add Models**, then pick **Ollama** from the provider list. It may be labelled
+   **"Ollama (Deprecated)"** — that's fine, it still works and loads your local models. VS Code
+   reads your running Ollama server; select **`qwen3.5:9b`** and add it. If it's hidden in the
+   picker afterward, click the **eye / Unhide** icon next to it.
+   - *Non-deprecated alternative:* **Install Model Providers → Ollama** (installs the official
+     `ollama.ollama` extension) — only on VS Code **1.120+**. Not required.
    - **Shortcut:** instead of steps 2–3, run **`ollama launch vscode`** in a terminal — it
      configures VS Code and shows recommended models automatically.
 4. Back in the chat box, set the mode to **Agent** and select **`qwen3.5:9b`** as the model.
@@ -109,7 +113,8 @@ You're ready — open [TUTORIAL.md](TUTORIAL.md) and do your first analysis.
   extensions by name in the Extensions panel (Step 4), or run **"Extensions: Show Recommended
   Extensions"** from the Command Palette (`Cmd/Ctrl+Shift+P`).
 - **Can't find an "Ollama" extension?** You don't need one. Add your models *through* GitHub
-  Copilot Chat: model dropdown → **Manage Models → Add Models → Ollama** (Step 5), or run
+  Copilot Chat: model dropdown → **Manage Models → Add Models → Ollama** (Step 5). In the
+  provider list it appears as **"Ollama (Deprecated)"** — use it anyway, it works. Or run
   `ollama launch vscode`. The separate `ollama.ollama` extension is optional and needs VS Code
   1.120+.
 - **No local model in the dropdown?** Make sure Ollama is running (Step 1), the model is pulled
