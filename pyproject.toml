@@ -1,0 +1,35 @@
+[project]
+name = "localexpert"
+version = "0.1.0"
+description = "Local LLM statistical analysis assistant driven by markdown skills."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ollama>=0.4.0",
+    "jupyter_client>=8.6",
+    "ipykernel>=6.29",
+    "nbformat>=5.10",
+    "pyyaml>=6.0",
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "scipy>=1.13",
+    "statsmodels>=0.14",
+    "scikit-learn>=1.5,<1.8",  # factor_analyzer 0.5.1 uses check_array(force_all_finite=), removed in sklearn 1.8
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+    "lifelines>=0.29",
+    "factor_analyzer>=0.5",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+localexpert-demo = "localexpert.demo:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
