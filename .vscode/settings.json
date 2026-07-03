@@ -1,0 +1,5 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
+  "notebook.output.textLineLimit": 30,
+  "chat.promptFiles": true
+}

@@ -5,6 +5,10 @@ __pycache__/
 .pytest_cache/
 .ipynb_checkpoints/
 
+# Build artifacts
+build/
+dist/
+
 # Generated audit notebooks (keep the directory, not its contents)
 # notebooks/*.ipynb
 

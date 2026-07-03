@@ -19,12 +19,15 @@ exported as an instruction/response pair for fine-tuning.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from importlib import resources
 from pathlib import Path
 
 import yaml
 
-# Repo-root/skills — this file is src/localexpert/skills.py, so go up three.
-SKILLS_DIR = Path(__file__).resolve().parents[2] / "skills"
+# Skills ship *inside* the package (src/localexpert/skills/) so they resolve both
+# from an editable checkout and from an installed wheel. `resources.files` returns
+# a path into the installed package data either way.
+SKILLS_DIR = Path(resources.files("localexpert") / "skills")
 
 REQUIRED_FIELDS = ("name", "description", "phase", "when_to_use")
 

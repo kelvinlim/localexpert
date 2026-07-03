@@ -8,6 +8,10 @@ leaves the laptop.
 See [DataAnalysisPipeline.md](DataAnalysisPipeline.md) for the four-phase pipeline
 the skills are derived from.
 
+> **Just want to chat with the model in VS Code?** That's the *interactive* path —
+> see [SETUP.md](SETUP.md) (install) and [TUTORIAL.md](TUTORIAL.md) (first analysis).
+> This page covers the *batch / reproducible* CLI path.
+
 ## Setup
 
 ```bash
@@ -99,7 +103,8 @@ stays local.
 
 | Path | Role |
 |------|------|
-| `skills/*/SKILL.md` | One skill per phase (frontmatter + procedure). Fine-tune-ready format. |
+| `src/localexpert/skills/*/SKILL.md` | One skill per phase (frontmatter + procedure). Fine-tune-ready; shipped as package data. |
+| `src/localexpert/init_cmd.py` · `cli.py` | `localexpert init` — scaffold a VS Code workspace from the skills. |
 | `src/localexpert/skills.py` | Discover/parse skills. |
 | `src/localexpert/kernel.py` | IPython kernel + nbformat audit trail. |
 | `src/localexpert/tools.py` | The single `run_python` tool. |

@@ -23,11 +23,30 @@ falls back automatically. `LOCALEXPERT_MODEL=<id>` overrides the pick.
 Design preferences: Python ≥ 3.12, standard packages, Jupyter notebooks for
 transparency.
 
+## Two ways to use it
+
+The same **skills** drive two front-ends:
+
+- **Interactive (VS Code) — for exploration, novice-friendly.** Chat with the local model
+  in VS Code's Copilot Agent mode; it writes and runs the analysis in a Jupyter notebook
+  right in front of you. One command scaffolds a ready workspace:
+
+  ```bash
+  uvx --from git+https://github.com/kelvinlim/localexpert localexpert init
+  ```
+
+  Full step-by-step install in **[SETUP.md](SETUP.md)**; a narrated first analysis in
+  **[TUTORIAL.md](TUTORIAL.md)**.
+
+- **Batch / reproducible (CLI) — for scripted runs.** The `localexpert` engine drives a
+  skill end-to-end and writes an audit notebook (used for the RetreatExercise and power
+  analyses). See the quickstart below and **[USAGE.md](USAGE.md)**.
+
 ## What works today
 
 Project 1 — the **statistical analysis assistant** — is a working skeleton:
 
-- **Seven skills** (`skills/*/SKILL.md`), each a fine-tune-ready procedure:
+- **Seven skills** (`src/localexpert/skills/*/SKILL.md`), each a fine-tune-ready procedure:
   1–4 the analysis pipeline (define question → EDA/missingness → cleaning →
   statistical testing), **5** psychometrics (reliability + factor analysis),
   **6** survival analysis, **7** power analysis (study planning).

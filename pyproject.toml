@@ -25,7 +25,9 @@ dependencies = [
 dev = ["pytest>=8.0"]
 
 [project.scripts]
+localexpert = "localexpert.cli:main"
 localexpert-demo = "localexpert.demo:main"
+localexpert-init = "localexpert.init_cmd:main"
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -33,3 +35,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+# Ship the markdown skills (and any generated templates) inside the wheel so they
+# resolve via importlib.resources, not just from an editable checkout.
+localexpert = ["skills/**/*.md"]
