@@ -101,7 +101,8 @@ See `TUTORIAL.md` for a full walkthrough.
 STARTER_LOAD_CODE = """\
 import pandas as pd
 
-df = pd.read_csv("data/sample_biobehavioral.csv")
+# This notebook lives in notebooks/, so the data folder is one level up.
+df = pd.read_csv("../data/sample_biobehavioral.csv")
 print(df.shape)
 df.head()
 """
