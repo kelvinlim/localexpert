@@ -37,6 +37,6 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.setuptools.package-data]
-# Ship the markdown skills (and any generated templates) inside the wheel so they
-# resolve via importlib.resources, not just from an editable checkout.
-localexpert = ["skills/**/*.md"]
+# Ship the markdown skills + references inside the wheel so they resolve via
+# importlib.resources, not just from an editable checkout.
+localexpert = ["skills/**/*.md", "references/*.md"]

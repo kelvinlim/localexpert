@@ -49,7 +49,13 @@ Project 1 — the **statistical analysis assistant** — is a working skeleton:
 - **Seven skills** (`src/localexpert/skills/*/SKILL.md`), each a fine-tune-ready procedure:
   1–4 the analysis pipeline (define question → EDA/missingness → cleaning →
   statistical testing), **5** psychometrics (reliability + factor analysis),
-  **6** survival analysis, **7** power analysis (study planning).
+  **6** survival analysis, **7** power analysis (study planning). Pick one by phase
+  number, by `/name` in VS Code, or by free-text intent (`localexpert demo --task "…"`;
+  `localexpert skills` lists the map).
+- **Shared references** (`src/localexpert/references/*.md`) — cross-cutting conventions
+  (stats reporting, local-only/PHI data handling, notebook practice) as one source,
+  injected into the CLI system prompt and exported to VS Code as auto-applied
+  `.github/instructions/`.
 - A local **Ollama tool-calling loop** driving a single `run_python` tool against a
   persistent IPython kernel, with an **nbformat audit trail** per run.
 - **Reproduces a real teaching exercise locally** — the three analyses in

@@ -29,6 +29,7 @@ from pathlib import Path
 
 import nbformat
 
+from .references import Reference, load_references
 from .runtime import PORTABLE_MODEL
 from .sample_data import make as make_sample_data
 from .skills import Skill, load_skills
@@ -132,14 +133,27 @@ def render_prompt_file(skill: Skill) -> str:
         f"which file if unclear). Follow the procedure below and satisfy every check, "
         f"then write a short markdown summary as the final cell.\n"
     )
-    return f"{front}\n{intro}\n{skill.body.strip()}\n"
+    when = f"**When to use this:** {skill.when_to_use}\n"
+    return f"{front}\n{when}\n{intro}\n{skill.body.strip()}\n"
+
+
+def render_instruction_file(ref: Reference) -> str:
+    """Render a VS Code `.instructions.md` (auto-applied to all files) from a reference."""
+    front = (
+        "---\n"
+        f"description: {ref.description}\n"
+        'applyTo: "**"\n'
+        "---\n"
+    )
+    return f"{front}\n{ref.body.strip()}\n"
 
 
 def write_github(target: Path) -> list[Path]:
-    """Write .github/copilot-instructions.md and one prompt file per skill."""
+    """Write copilot-instructions, one prompt per skill, and one instruction per reference."""
     written: list[Path] = []
     gh = target / ".github"
     (gh / "prompts").mkdir(parents=True, exist_ok=True)
+    (gh / "instructions").mkdir(parents=True, exist_ok=True)
 
     instr = gh / "copilot-instructions.md"
     instr.write_text(COPILOT_INSTRUCTIONS, encoding="utf-8")
@@ -148,6 +162,11 @@ def write_github(target: Path) -> list[Path]:
     for skill in load_skills():
         p = gh / "prompts" / prompt_file_name(skill)
         p.write_text(render_prompt_file(skill), encoding="utf-8")
+        written.append(p)
+
+    for ref in load_references():
+        p = gh / "instructions" / f"{ref.name}.instructions.md"
+        p.write_text(render_instruction_file(ref), encoding="utf-8")
         written.append(p)
     return written
 

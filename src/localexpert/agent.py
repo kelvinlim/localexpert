@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .kernel import KernelSession
+from .references import references_prompt_block
 from .runtime import OllamaRuntime, RunResult
 from .skills import Skill, select
 from .tools import run_python
@@ -32,7 +33,12 @@ class Agent:
     skills_dir: Path | None = None
 
     def _system_prompt(self, skill: Skill) -> str:
-        return f"{BASE_PERSONA}\n\n{skill.prompt_block}"
+        refs = references_prompt_block()
+        parts = [BASE_PERSONA]
+        if refs:
+            parts.append(refs)
+        parts.append(skill.prompt_block)
+        return "\n\n".join(parts)
 
     def _user_prompt(self, skill: Skill, data_path: Path | None, extra: str = "") -> str:
         if data_path is None:

@@ -3,6 +3,8 @@ description: Turn raw data into an analysis-ready state without introducing bias
 agent: agent
 ---
 
+**When to use this:** After EDA/missingness diagnostics, before statistical testing.
+
 You are performing a **cleaning-preprocessing** analysis (Phase 3) in the open Jupyter notebook. Work incrementally: add and run one cell at a time and inspect each output before continuing. Load the dataset the user names (ask which file if unclear). Follow the procedure below and satisfy every check, then write a short markdown summary as the final cell.
 
 ## Objective

@@ -43,7 +43,8 @@ The agent loads the Phase-2 skill, executes analysis code step by step, prints a
 findings summary, and writes an audit notebook to `notebooks/phase2.ipynb`. Open
 that notebook to see every cell it ran and the outputs (including plots).
 
-Flags: `--phase {1,2,3,4,5,6,7}`, `--model <ollama-id>`, `--data <csv>`,
+Flags: `--phase {1,2,3,4,5,6,7}`, `--task "<free-text intent>"` (heuristic skill
+routing — alternative to `--phase`), `--model <ollama-id>`, `--data <csv>`,
 `--no-data`, `--prompt "<directed instructions>"`, `--max-iterations <n>`,
 `--notebook <path>`. Phases 1–4 are the pipeline stages; **5** is psychometrics
 (reliability + factor analysis), **6** is survival analysis, and **7** is power
@@ -104,7 +105,8 @@ stays local.
 | Path | Role |
 |------|------|
 | `src/localexpert/skills/*/SKILL.md` | One skill per phase (frontmatter + procedure). Fine-tune-ready; shipped as package data. |
-| `src/localexpert/init_cmd.py` · `cli.py` | `localexpert init` — scaffold a VS Code workspace from the skills. |
+| `src/localexpert/references/*.md` | Shared cross-cutting conventions (single source), injected into the CLI prompt + exported to VS Code. |
+| `src/localexpert/init_cmd.py` · `cli.py` | `localexpert init` — scaffold a VS Code workspace; `localexpert skills` — list the skill map. |
 | `src/localexpert/skills.py` | Discover/parse skills. |
 | `src/localexpert/kernel.py` | IPython kernel + nbformat audit trail. |
 | `src/localexpert/tools.py` | The single `run_python` tool. |

@@ -3,6 +3,8 @@ description: Check assumptions, run the right test, correct for multiplicity, re
 agent: agent
 ---
 
+**When to use this:** On a cleaned dataset, to perform the hypothesis test framed in Phase 1.
+
 You are performing a **statistical-testing** analysis (Phase 4) in the open Jupyter notebook. Work incrementally: add and run one cell at a time and inspect each output before continuing. Load the dataset the user names (ask which file if unclear). Follow the procedure below and satisfy every check, then write a short markdown summary as the final cell.
 
 ## Objective

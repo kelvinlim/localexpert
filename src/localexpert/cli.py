@@ -13,6 +13,14 @@ import sys
 
 from . import demo as demo_mod
 from . import init_cmd
+from .skills import load_skills
+
+
+def _list_skills(_args: argparse.Namespace) -> int:
+    """Print the skill map (phase, name, description, when_to_use)."""
+    for s in load_skills():
+        print(f"[{s.phase}] {s.name}\n    {s.description}\n    when to use: {s.when_to_use}")
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -25,6 +33,9 @@ def main(argv: list[str] | None = None) -> int:
     p_init = sub.add_parser("init", help="Scaffold a VS Code + local-LLM workspace.")
     init_cmd.add_arguments(p_init)
     p_init.set_defaults(_run=init_cmd.run)
+
+    p_skills = sub.add_parser("skills", help="List the available skills and when to use each.")
+    p_skills.set_defaults(_run=_list_skills)
 
     sub.add_parser(
         "demo",

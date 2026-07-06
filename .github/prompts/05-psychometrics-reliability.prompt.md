@@ -3,6 +3,8 @@ description: Internal-consistency reliability and factor structure for a multi-i
 agent: agent
 ---
 
+**When to use this:** When validating a symptom inventory or rating scale — grouped items that should form coherent subscales.
+
 You are performing a **psychometrics-reliability** analysis (Phase 5) in the open Jupyter notebook. Work incrementally: add and run one cell at a time and inspect each output before continuing. Load the dataset the user names (ask which file if unclear). Follow the procedure below and satisfy every check, then write a short markdown summary as the final cell.
 
 ## Objective

@@ -12,6 +12,7 @@ from pathlib import Path
 
 from .agent import Agent
 from .runtime import DEFAULT_MODEL, OllamaRuntime
+from .skills import select_by_intent
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -31,6 +32,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--phase", type=int, default=2, choices=[1, 2, 3, 4, 5, 6, 7],
                         help="Skill to run: 1-4 pipeline phases, 5 psychometrics, "
                              "6 survival, 7 power analysis (default: 2, EDA).")
+    parser.add_argument("--task", default=None,
+                        help="Pick the skill by free-text intent instead of --phase "
+                             "(heuristic keyword match on when_to_use/description, not an "
+                             "LLM router). E.g. --task \"check scale reliability\".")
     parser.add_argument("--data", type=Path,
                         default=REPO_ROOT / "data" / "sample_biobehavioral.csv",
                         help="Path to the dataset CSV.")
@@ -49,6 +54,12 @@ def main(argv: list[str] | None = None) -> int:
                              "skill-only (blind) behavior.")
     args = parser.parse_args(argv)
 
+    phase = args.phase
+    if args.task:
+        skill = select_by_intent(args.task)
+        phase = skill.phase
+        print(f"Task {args.task!r} -> skill '{skill.name}' (phase {phase})")
+
     data_path = None if args.no_data else args.data
     if data_path is not None and not data_path.exists():
         parser.error(
@@ -57,15 +68,15 @@ def main(argv: list[str] | None = None) -> int:
             "(or pass --no-data for an a-priori planning task like power analysis)"
         )
 
-    notebook_path = args.notebook or (REPO_ROOT / "notebooks" / f"phase{args.phase}.ipynb")
+    notebook_path = args.notebook or (REPO_ROOT / "notebooks" / f"phase{phase}.ipynb")
 
     runtime = OllamaRuntime(model=args.model, max_iterations=args.max_iterations)
     agent = Agent(runtime=runtime)
 
     data_label = "(a priori / no data)" if data_path is None else data_path
-    print(f"Model: {args.model} | Phase: {args.phase} | Data: {data_label}")
+    print(f"Model: {args.model} | Phase: {phase} | Data: {data_label}")
     result = agent.run_phase(
-        phase=args.phase,
+        phase=phase,
         data_path=data_path,
         notebook_path=notebook_path,
         extra_instructions=args.prompt,

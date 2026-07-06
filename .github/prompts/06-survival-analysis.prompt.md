@@ -3,6 +3,8 @@ description: Time-to-event analysis with censoring — Kaplan-Meier, log-rank, a
 agent: agent
 ---
 
+**When to use this:** When the outcome is time-to-event (relapse, readmission, re-arrest) and some subjects never experience the event during follow-up.
+
 You are performing a **survival-analysis** analysis (Phase 6) in the open Jupyter notebook. Work incrementally: add and run one cell at a time and inspect each output before continuing. Load the dataset the user names (ask which file if unclear). Follow the procedure below and satisfy every check, then write a short markdown summary as the final cell.
 
 ## Objective

@@ -22,6 +22,9 @@ def test_prompt_file_per_skill_with_valid_frontmatter():
         assert fm["description"] == skill.description
         # The skill's procedure carries through into the prompt body.
         assert "Procedure" in text
+        # when_to_use is surfaced for intent-based discovery.
+        assert "When to use this" in text
+        assert skill.when_to_use in text
 
 
 def test_build_workspace_scaffolds_all_artifacts(tmp_path):
@@ -38,6 +41,14 @@ def test_build_workspace_scaffolds_all_artifacts(tmp_path):
     assert "ollama.ollama" in ext["recommendations"]
     settings = json.loads((tmp_path / ".vscode" / "settings.json").read_text())
     assert "python.defaultInterpreterPath" in settings
+
+    # One auto-applied instruction file per reference (from the references layer).
+    from localexpert.references import load_references
+
+    instr = sorted((tmp_path / ".github" / "instructions").glob("*.instructions.md"))
+    assert len(instr) == len(load_references())
+    sample = instr[0].read_text()
+    assert 'applyTo: "**"' in sample and "description:" in sample
 
     # Starter notebook is valid and sample data was written.
     nb = nbformat.read(str(tmp_path / "notebooks" / "analysis_starter.ipynb"), as_version=4)

@@ -100,3 +100,68 @@ def select(phase: int, skills_dir: Path = SKILLS_DIR) -> Skill:
         names = ", ".join(s.name for s in matches)
         raise ValueError(f"Multiple skills for phase {phase}: {names}")
     return matches[0]
+
+
+# Words too generic (in a data-analysis tool) to distinguish one skill from another.
+_STOPWORDS = frozenset(
+    "a an the of to for and or in on with without is are do does this that i want "
+    "we my me it its some any how what which over into out want need please help "
+    "analysis analyse analyze data dataset".split()
+)
+
+
+def _tokens(text: str) -> set[str]:
+    cleaned = "".join(c.lower() if c.isalnum() else " " for c in text)
+    return {w for w in cleaned.split() if len(w) > 2 and w not in _STOPWORDS}
+
+
+def _overlap(query_tokens: set[str], corpus_tokens: set[str]) -> int:
+    """Count query tokens that match a corpus token exactly or by 4+ char prefix.
+
+    Prefix matching gives light stemming (clean~cleaning, missing~missingness,
+    outlier~outliers) without a stemming dependency.
+    """
+    count = 0
+    for q in query_tokens:
+        if q in corpus_tokens or any(
+            len(q) >= 4 and len(t) >= 4 and (t.startswith(q) or q.startswith(t))
+            for t in corpus_tokens
+        ):
+            count += 1
+    return count
+
+
+def select_by_intent(query: str, skills_dir: Path = SKILLS_DIR) -> Skill:
+    """Pick the skill whose text best matches a free-text ``query``.
+
+    A lightweight, dependency-free keyword-overlap scorer over each skill's
+    ``when_to_use`` + ``description`` + ``name`` + ``body`` — a heuristic for routing a
+    task to a skill, **not** an LLM router. Ties break to the lowest phase. Raises
+    ``ValueError`` if the query has no usable words or nothing matches.
+    """
+    q = _tokens(query)
+    if not q:
+        raise ValueError(f"No usable words in task query: {query!r}")
+    corpora = [
+        (s, _tokens(f"{s.when_to_use} {s.description} {s.name} {s.body}"))
+        for s in load_skills(skills_dir)
+    ]
+    # Weight each query token by how discriminative it is: a token matching many
+    # skills (e.g. "before") is worth less than one matching a single skill.
+    hits = {t: [c for _, c in corpora if _overlap({t}, c)] for t in q}
+    weight = {t: (1.0 / len(cs) if cs else 0.0) for t, cs in hits.items()}
+
+    def score(corpus: set[str]) -> float:
+        return sum(weight[t] for t in q if _overlap({t}, corpus))
+
+    scored = sorted(
+        ((score(c), -s.phase, s) for s, c in corpora),
+        key=lambda t: (t[0], t[1]),
+        reverse=True,
+    )
+    best_score, _, best = scored[0]
+    if best_score == 0:
+        raise ValueError(
+            f"No skill matched task {query!r}. Try `--phase` or `localexpert skills`."
+        )
+    return best
