@@ -5,11 +5,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 A **local, private** statistical-analysis assistant. A small local LLM (served by
-Ollama) is extended with markdown **skills**, then driven through an agentic loop
-where it writes and *runs* Python in a live Jupyter kernel, recording every step
-to an auditable `.ipynb`. The point is that sensitive/PHI data never leaves the
-laptop — this is the offline replacement for cloud tools like Colab+Gemini (see
-`RetreatExercise.md`). Python ≥3.12; Apple Silicon 16–32 GB is the target machine.
+Ollama) is extended with markdown **skills** + shared **references**, then driven to
+write and *run* Python in a live Jupyter kernel, recording every step to an auditable
+`.ipynb`. Sensitive/PHI data never leaves the laptop — the offline replacement for
+cloud tools like Colab+Gemini (see `RetreatExercise.md`). Python ≥3.12; Apple Silicon
+16–32 GB is the target machine.
+
+The same skills/references drive **two front-ends**:
+- **Batch/reproducible CLI** — `localexpert`'s own agentic loop (`agent.py` + `runtime.py`),
+  used by `demo.py` and `scripts/run_*.py`. This is the engine the Architecture section traces.
+- **Interactive VS Code** — `localexpert init` (`init_cmd.py`/`cli.py`) scaffolds a workspace
+  that exports the skills/references to `.github/` so VS Code's Copilot agent (with a local
+  Ollama model) writes+runs cells. See `SETUP.md` / `TUTORIAL.md` / `docs/vscode-local-llm-workflow-plan.md`.
 
 ## Commands
 
@@ -22,10 +29,15 @@ pip install -e ".[dev]"
 ollama pull qwen3.5:9b-mlx     # Apple Silicon
 ollama pull qwen3.5:9b         # Windows/Linux x86, Intel Mac (portable fallback)
 
-# Data + demo
+# Data + demo (batch CLI)
 python scripts/make_sample_data.py                 # -> data/sample_biobehavioral.csv
-python -m localexpert.demo --phase 2               # run one skill on a dataset
+python -m localexpert.demo --phase 2               # run one skill by phase number
+python -m localexpert.demo --task "check scale reliability"      # pick skill by intent
 python -m localexpert.demo --phase 7 --no-data --prompt "..."   # a-priori planning
+localexpert skills                                 # list the skill map (phase/name/when_to_use)
+
+# Interactive VS Code workspace (scaffold + export skills/references to .github/)
+localexpert init [folder]                          # also builds .venv + pulls the model
 
 # Reproduce the RetreatExercise (three analyses, one notebook each)
 python scripts/make_btheb_data.py && python scripts/make_bfi_data.py && python scripts/make_rossi_data.py
@@ -41,16 +53,18 @@ and `scripts/run_*.py` require a running Ollama with the model pulled.
 
 ## Architecture
 
-The whole system is one agentic loop assembled from five modules in
-`src/localexpert/`. Trace a run to understand it:
+The **batch CLI** is one agentic loop assembled from five core modules in
+`src/localexpert/` (the interactive path reuses only the skills/references, not this loop
+— it's exported to VS Code by `init_cmd.py`/`cli.py`, with `sample_data.py` providing the
+demo dataset). Trace a CLI run to understand the engine:
 
 1. **Entry** (`demo.py` or `scripts/run_*.py`) builds an `OllamaRuntime` and an
    `Agent`, then calls `Agent.run_phase(phase, data_path, notebook_path, extra_instructions)`.
 2. **`agent.py`** selects the skill for that phase (`skills.select`), composes the
-   system prompt (`BASE_PERSONA` + `skill.prompt_block`) and the user prompt, opens
-   a `KernelSession`, and hands control to the runtime with a one-entry tool
-   dispatch table mapping `run_python` → the kernel. The audit notebook is saved in
-   a `finally` block, so it persists even if the run errors or hits the limit.
+   system prompt (`BASE_PERSONA` + shared `references_prompt_block()` + `skill.prompt_block`)
+   and the user prompt, opens a `KernelSession`, and hands control to the runtime with a
+   one-entry tool dispatch table mapping `run_python` → the kernel. The audit notebook is
+   saved in a `finally` block, so it persists even if the run errors or hits the limit.
 3. **`runtime.py`** loops calling `ollama.chat` with a single tool (`RUN_PYTHON_TOOL`).
    Each `tool_calls` entry is dispatched to the kernel and the text result appended
    as a `role: tool` message; the loop ends when the model returns plain text (its
@@ -75,17 +89,32 @@ The whole system is one agentic loop assembled from five modules in
 - **Two run modes.** `data_path` set → dataset-backed analysis; `data_path=None`
   (`--no-data`) → a-priori study planning with no data (e.g. power analysis, phase 7).
 
-### Skills
+### Skills & references
 
-Each skill is `skills/<dir>/SKILL.md`: YAML frontmatter (`name`, `description`,
-`phase`, `when_to_use`) + a body with a fixed **Objective / Procedure / Checks /
-Output** structure (parsed in `skills.py`). The integer **`phase` is the selection
-key** — `select(phase)` requires exactly one skill per phase. Current phases: 1–4
-are the `DataAnalysisPipeline.md` stages (define question, EDA/missingness,
-cleaning, testing); 5 psychometrics, 6 survival, 7 power. The rigid body format is
-deliberate so skills can later double as fine-tuning data.
+Skills and references live **inside the package** (`src/localexpert/skills/`,
+`src/localexpert/references/`) and are shipped as package data — `skills.py`/`references.py`
+resolve them via `importlib.resources` (`SKILLS_DIR`/`REFERENCES_DIR`), so they work from an
+editable checkout *and* an installed wheel. Both are declared in `pyproject.toml`
+`[tool.setuptools.package-data]`.
 
-**To add a skill:** create `skills/NN-name/SKILL.md` with a new unique `phase`
-number and all four frontmatter fields. `tests/test_skills.py` asserts the exact
-set of discovered phases and that every skill has non-empty frontmatter/body —
-update those assertions when the phase set changes.
+**Skills** — each `skills/<dir>/SKILL.md`: YAML frontmatter (`name`, `description`, `phase`,
+`when_to_use`) + a fixed **Objective / Procedure / Checks / Output** body. Selection three ways:
+- `select(phase)` — the integer `phase` is the deterministic key; exactly one skill per phase.
+- `select_by_intent(query)` — heuristic keyword router (inverse-skill-frequency weighted over
+  when_to_use/description/name/body); exposed as `demo.py --task "..."`. Not an LLM router.
+- VS Code `/name` — the exported prompt files (`.github/prompts/`) carry a "When to use this"
+  line so Copilot can pick by intent.
+Current phases: 1–4 the `DataAnalysisPipeline.md` stages; 5 psychometrics, 6 survival, 7 power.
+The rigid body format is deliberate so skills can double as fine-tuning data.
+
+**References** — each `references/<name>.md`: frontmatter (`description`) + a short body of
+cross-cutting conventions (stats reporting, data handling/PHI, notebook practice). They are the
+single source, injected into the CLI system prompt (`agent.py`) and exported to VS Code as
+auto-applied `.github/instructions/*.instructions.md` (`init_cmd.py`).
+
+**To add a skill:** create `src/localexpert/skills/NN-name/SKILL.md` with a new unique `phase`
+and all four frontmatter fields. `tests/test_skills.py` asserts the exact set of discovered
+phases; `tests/test_init.py`/`test_references.py` assert the export + intent routing — update
+those when the skill/reference set changes. **To add a reference:** drop a
+`src/localexpert/references/<name>.md` with a `description` frontmatter; both front-ends pick
+it up automatically.
